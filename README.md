@@ -5,12 +5,15 @@ This tool is similar to apachectl and which main feature is to list
 domains configured on a nginx webserver.
 
 <h2>Download/Installation</h2>
+
 ```
 wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O nginxctl.py 
 python nginxctl.py
 ```
 
+
 <h2>Usage</h2>
+
 ```
 Usage: nginxctl.py [option]
 Example: nginxctl.py -v
@@ -19,12 +22,11 @@ Example: nginxctl.py -v
 Available options:
 	-S list nginx vhosts
 	-t configuration test
-	-k start|stop|status|restart|fullstatus
-	-v version
 	-h help
 ```
 
 Here is an example of running the option to discover virtual hosts
+
 ```
 # python nginxctl.py -S
 nginx vhost configuration:
