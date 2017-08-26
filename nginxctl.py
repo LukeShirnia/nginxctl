@@ -1,23 +1,4 @@
 #!/usr/bin/env python
-#
-# The nginxctl allow to control some of the functionlities of nginx daemon.
-# This tool is similar to apachectl and main feature of this tool is to list
-# domains configured on a nginx webserver.
-#
-# Copyright 2016 Rackspace, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-# this file except in compliance with the License.  You may obtain a copy of the
-# License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software distributed
-# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-# CONDITIONS OF ANY KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations under the License.
-#
-
 import subprocess
 import re
 import sys
@@ -26,7 +7,6 @@ import urllib2
 
 
 class bcolors:
-
     """
     This class is to display differnet colour fonts
     """
@@ -42,21 +22,10 @@ class bcolors:
 
 
 class nginxCtl:
-
     """
     A class for nginxCtl functionalities
     """
 
-    def get_version(self):
-        """
-        Discovers installed nginx version
-        """
-        version = "nginx -v"
-        p = subprocess.Popen(
-            version, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-            )
-        output, err = p.communicate()
-        return err
 
     def get_conf_parameters(self):
         """
@@ -75,6 +44,7 @@ class nginxCtl:
                 dict[item.split("=")[0]] = item.split("=")[1]
         return dict
 
+
     def get_nginx_conf(self):
         """
         :returns: nginx configuration path location
@@ -85,101 +55,6 @@ class nginxCtl:
             print "nginx is not installed!!!"
             sys.exit()
 
-    def get_nginx_bin(self):
-        """
-        :returns: nginx binary location
-        """
-        try:
-            return self.get_conf_parameters()['--sbin-path']
-        except:
-            print "nginx is not installed!!!"
-            sys.exit()
-
-    def get_nginx_pid(self):
-        """
-        :returns: nginx pid location which is required by nginx services
-        """
-
-        try:
-            return self.get_conf_parameters()['--pid-path']
-        except:
-            print "nginx is not installed!!!"
-            sys.exit()
-
-    def get_nginx_lock(self):
-        """
-        :returns: nginx lock file location which is required for nginx services
-        """
-
-        try:
-            return self.get_conf_parameters()['--lock-path']
-        except:
-            print "nginx is not installed!!!"
-            sys.exit()
-
-    def start_nginx(self):
-        """
-        Start nginx service if pid and socket file do not exist.
-        """
-        nginx_conf_path = self.get_nginx_conf()
-        nginx_lock_path = self.get_nginx_lock()
-        if os.path.exists(nginx_lock_path):
-            print "nginx is already running... Nothing to be done!"
-        else:
-            cmd = "nginx -c " + nginx_conf_path
-            p = subprocess.Popen(cmd,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 shell=True
-                                 )
-            output, err = p.communicate()
-            if not err:
-                file = open(nginx_lock_path, 'w')
-                file.close()
-                print "Starting nginx:\t\t\t\t\t    [ %sOK%s ]" % (
-                    bcolors.OKGREEN,
-                    bcolors.ENDC
-                    )
-            else:
-                print err
-
-    def stop_nginx(self):
-        """
-        Stop nginx service.
-        """
-        nginx_pid_path = self.get_nginx_pid()
-        nginx_lock_path = self.get_nginx_lock()
-        if os.path.exists(nginx_pid_path):
-            try:
-                pid_file = open(nginx_pid_path, "r")
-                pid = pid_file.read().strip()
-                pid_file.close()
-                pid_cmd = "ps -p %s -o comm=" % pid
-                p = subprocess.Popen(pid_cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True
-                                     )
-                pid, err = p.communicate()
-            except IOError:
-                print "Cannot open nginx pid file"
-            if pid:
-                cmd = "nginx -s quit"
-                p = subprocess.Popen(cmd,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     shell=True
-                                     )
-                output, err = p.communicate()
-                if not err:
-                    if os.path.exists(nginx_lock_path):
-                        os.remove(nginx_lock_path)
-                    print "Stoping nginx:\t\t\t\t\t    [  %sOK%s  ]" % (
-                        bcolors.OKGREEN,
-                        bcolors.ENDC
-                        )
-                else:
-                    print err
 
     def configtest_nginx(self):
         """
@@ -194,14 +69,8 @@ class nginxCtl:
             )
         output, err = p.communicate()
         print err
-
-    def restart_nginx(self):
-        """
-        Restart nginx service. Stop and Start nginx functions are used.
-        """
-        self.stop_nginx()
-        self.start_nginx()
-
+    
+   
     def full_status(self):
         """
         Checks against /server-status for server statistics
@@ -227,33 +96,6 @@ Nginx Server Status
 Attempt to query /server-status returned an error
                 """
 
-    def status_nginx(self):
-        """
-        Report nginx status based on pid and socket files.
-        """
-        nginx_pid_path = self.get_nginx_pid()
-        nginx_lock_path = self.get_nginx_lock()
-        if os.path.exists(nginx_pid_path):
-            try:
-                pid_file = open(nginx_pid_path, "r")
-                pid = pid_file.read().strip()
-                pid_file.close()
-                cmd = "ps -p %s -o comm=" % pid
-                p = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=True)
-                output, err = p.communicate()
-                if output:
-                    print "nginx (pid %s) is running ..." % pid
-            except IOError:
-                print "Cannot open nginx pid file"
-        elif (os.path.exists(nginx_lock_path) and not
-                os.path.exists(nginx_pid_path)):
-            print "nginx pid file exists"
-        else:
-            print "nginx is stopped"
 
     def _get_vhosts(self):
         """
@@ -263,6 +105,7 @@ Attempt to query /server-status returned an error
         for f in self._get_all_config():
             ret += self._get_vhosts_info(f)
         return ret
+
 
     def _strip_line(self, path, remove=None):
         """ Removes any trailing semicolons, and all quotes from a string
@@ -274,6 +117,7 @@ Attempt to query /server-status returned an error
                 path = path.replace(c, '')
 
         return path
+
 
     def _get_full_path(self, path, root, parent=None):
         """ Returns a potentially relative path and returns an absolute one
@@ -294,6 +138,7 @@ Attempt to query /server-status returned an error
             return candidate_path
 
         return path
+
 
     def _get_includes_line(self, line, parent, root):
         """ Reads a config line, starting with 'include', and returns a list
@@ -332,6 +177,7 @@ Attempt to query /server-status returned an error
         except OSError:
             return []
 
+
     def _get_all_config(self, config_file=None):
         """
         Reads all config files, starting from the main one, expands all
@@ -356,6 +202,7 @@ Attempt to query /server-status returned an error
                     except IOError:
                         pass
         return ret
+
 
     def _get_vhosts_info(self, config_file):
         server_block_boundry = []
@@ -415,6 +262,7 @@ Attempt to query /server-status returned an error
                     ip_port.append(l.split()[1])
         return server_dict_ret
 
+
     def get_vhosts(self):
         vhosts_list = self._get_vhosts()
         print "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC)
@@ -456,37 +304,23 @@ def main():
 
     def usage():
         print ("Usage: %s [option]" % sys.argv[0])
-        print ("Example: %s -v" % sys.argv[0])
+        print ("Example: %s -S" % sys.argv[0])
         print "\n"
         print "Available options:"
         print "\t-S list nginx vhosts"
         print "\t-t configuration test"
-        print "\t-k start|stop|status|restart|fullstatus"
-        print "\t-v version"
+        print "\t-k status|fullstatus"
         print "\t-h help"
 
-    def version():
-        print "version 1.1"
 
     commandsDict = {"-S": n.get_vhosts,
                     "-t": n.configtest_nginx,
-                    "-k": n.restart_nginx,
-                    "-v": version,
                     "-h": usage}
-    subcommandsDict = {"start": n.start_nginx,
-                       "stop": n.stop_nginx,
-                       "restart": n.restart_nginx,
-                       "status": n.status_nginx,
-                       "fullstatus": n.full_status}
+    subcommandsDict = {"fullstatus": n.full_status}
     allCommandsDict = {"-S": n.get_vhosts,
                        "-t": n.configtest_nginx,
                        "-k": usage,
-                       "-v": version,
                        "-h": usage,
-                       "start": n.start_nginx,
-                       "stop": n.stop_nginx,
-                       "restart": n.restart_nginx,
-                       "status": n.status_nginx,
                        "fullstatus": n.full_status}
     commandline_args = sys.argv[1:]
     if len(commandline_args) == 1:
