@@ -7,7 +7,7 @@ domains configured on a nginx webserver.
 <h2>Download/Installation</h2>
 
 ```
-wget https://raw.githubusercontent.com/fooltruth/nginxctl/master/nginxCtl.py -O nginxctl.py 
+wget https://raw.githubusercontent.com/LukeShirnia/nginxctl/master/nginxctl.py -O nginxctl.py 
 python nginxctl.py
 ```
 
@@ -36,4 +36,3 @@ nginx vhost configuration:
 	port 80 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
 
 ```
-Documentation can be found at: http://fooltruth.github.io/nginxctl/
