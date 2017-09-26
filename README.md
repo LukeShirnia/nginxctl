@@ -21,4 +21,3 @@ nginx vhost configuration:
 	port 80 namevhost  example.com  (/etc/nginx/sites-enabled/example.com:5)
 
 ```
-Documentation can be found at: http://fooltruth.github.io/nginxctl/
