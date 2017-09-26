@@ -250,6 +250,5 @@ def main():
     else:
 	print "No options available"
 	print "Re-run script with NO options"
-        #usage()
 if __name__ == "__main__":
     main()
