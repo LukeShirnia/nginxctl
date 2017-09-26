@@ -10,15 +10,10 @@ class bcolors:
     """
     This class is to display differnet colour fonts
     """
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
+    GREEN = '\033[1;32m'
+    RESET = '\033[0m'
+    WHITE = '\033[1m'
     CYAN = '\033[96m'
-    UNDERLINE = '\033[4m'
 
 
 class nginxCtl:
@@ -213,7 +208,7 @@ class nginxCtl:
 
     def get_vhosts(self):
         vhosts_list = self._get_vhosts()
-        print "%snginx vhost configuration:%s" % (bcolors.BOLD, bcolors.ENDC)
+        print "%snginx vhost configuration:%s" % (bcolors.WHITE, bcolors.RESET)
         for vhost in vhosts_list:
             ip_ports = vhost['ip_port']
             for ip_port_x in ip_ports:
@@ -236,15 +231,15 @@ class nginxCtl:
                 config_file = vhost.get('config_file', None)
                 print "%s:%s is a Virtualhost" % (ip, port)
                 print "\tport %s namevhost %s %s %s (%s:%s)" % (port,
-                                                                bcolors.OKGREEN,
+                                                                bcolors.GREEN,
                                                                 servername,
-                                                                bcolors.ENDC,
+                                                                bcolors.RESET,
                                                                 config_file,
                                                                 line_number)
                 for alias in serveralias:
                     print "\t\talias %s %s %s" % (bcolors.CYAN,
                                                   alias,
-                                                  bcolors.ENDC)
+                                                  bcolors.RESET)
 
 
 def main():
