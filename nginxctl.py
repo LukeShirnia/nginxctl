@@ -45,58 +45,6 @@ class nginxCtl:
         return dict
 
 
-    def get_nginx_conf(self):
-        """
-        :returns: nginx configuration path location
-        """
-        try:
-            return self.get_conf_parameters()['--conf-path']
-        except KeyError:
-            print "nginx is not installed!!!"
-            sys.exit()
-
-
-    def configtest_nginx(self):
-        """
-        Ensure there is no syntax errors are reported.
-        The 'nginx -t' command is used for this.
-        """
-        p = subprocess.Popen(
-            "nginx -t",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True
-            )
-        output, err = p.communicate()
-        print err
-    
-   
-    def full_status(self):
-        """
-        Checks against /server-status for server statistics
-        """
-        try:
-            request = urllib2.urlopen('http://localhost/server-status')
-            if str(request.getcode()) == "200":
-                print """
-Nginx Server Status
--------------------
-%s
-                    """ % request.read()
-            else:
-                print """
-Nginx Server Status
--------------------
-server-status did not return a 200 response.
-                    """
-        except (urllib2.HTTPError, urllib2.URLError):
-            print """
-Nginx Server Status
--------------------
-Attempt to query /server-status returned an error
-                """
-
-
     def _get_vhosts(self):
         """
         get vhosts
@@ -301,42 +249,9 @@ Attempt to query /server-status returned an error
 
 def main():
     n = nginxCtl()
-
-    def usage():
-        print ("Usage: %s [option]" % sys.argv[0])
-        print ("Example: %s -S" % sys.argv[0])
-        print "\n"
-        print "Available options:"
-        print "\t-S list nginx vhosts"
-        print "\t-t configuration test"
-        print "\t-k status|fullstatus"
-        print "\t-h help"
-
-
-    commandsDict = {"-S": n.get_vhosts,
-                    "-t": n.configtest_nginx,
-                    "-h": usage}
-    subcommandsDict = {"fullstatus": n.full_status}
-    allCommandsDict = {"-S": n.get_vhosts,
-                       "-t": n.configtest_nginx,
-                       "-k": usage,
-                       "-h": usage,
-                       "fullstatus": n.full_status}
-    commandline_args = sys.argv[1:]
-    if len(commandline_args) == 1:
-        for argument in commandline_args:
-            if argument in allCommandsDict:
-                allCommandsDict[argument]()
-            else:
-                usage()
-    elif len(commandline_args) == 2:
-        if sys.argv[1] == "-k":
-            flag = sys.argv[2:]
-            for f in flag:
-                if f in subcommandsDict:
-                    subcommandsDict[f]()
-        else:
-            usage()
+	
+    if len(sys.argv) == 1:
+        n.get_vhosts()
     else:
         usage()
 if __name__ == "__main__":
