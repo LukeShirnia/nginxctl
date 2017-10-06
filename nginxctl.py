@@ -47,6 +47,7 @@ class nginxCtl:
         ret = []
         for f in self._get_all_config():
             ret += self._get_vhosts_info(f)
+        #print ret
         return ret
 
 
@@ -58,28 +59,6 @@ class nginxCtl:
         for c in remove:
             if c in path:
                 path = path.replace(c, '')
-
-        return path
-
-
-    def _get_full_path(self, path, root, parent=None):
-        """ Returns a potentially relative path and returns an absolute one
-            either relative to parent or root, whichever exists in that order
-        """
-        if os.path.isabs(path) and os.path.exists(path):
-            return path
-
-        if parent:
-            if os.path.isfile(parent):
-                parent = os.path.dirname(parent)
-            candidate_path = os.path.join(parent, path)
-            if os.path.isabs(candidate_path) and os.path.exists(candidate_path):
-                return candidate_path
-
-        candidate_path = os.path.join(root, path)
-        if os.path.isabs(candidate_path) and os.path.exists(candidate_path):
-            return candidate_path
-
         return path
 
 

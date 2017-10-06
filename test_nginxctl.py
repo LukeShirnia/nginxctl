@@ -1,15 +1,17 @@
 # Unit Test NginxCtl
-
+import os
 import pytest
 import textwrap
+import sys
 import nginxctl
+
 
 NGINX_CONF = textwrap.dedent("""\
     user nginx;
     worker_processes auto;
     error_log /var/log/nginx/error.log;
     pid /run/nginx.pid;
-    include /usr/share/nginx/modules/*.conf;
+    # include /usr/share/nginx/modules/*.conf;
     events {
         worker_connections 1024;
     }
@@ -23,7 +25,7 @@ NGINX_CONF = textwrap.dedent("""\
         tcp_nodelay         on;
         keepalive_timeout   65;
         types_hash_max_size 2048;
-        include             /etc/nginx/mime.types;
+        # include             /etc/nginx/mime.types;
         default_type        application/octet-stream;
         include /etc/nginx/conf.d/*.conf;
         server {
@@ -31,7 +33,7 @@ NGINX_CONF = textwrap.dedent("""\
             listen       [::]:80 default_server;
             server_name  _;
             root         /usr/share/nginx/html;
-            include /etc/nginx/default.d/*.conf;
+            # include /etc/nginx/default.d/*.conf;
             location / {
             }
             error_page 404 /404.html;
@@ -43,7 +45,8 @@ NGINX_CONF = textwrap.dedent("""\
         }
     }
 """)
-NGINX_SERVERBLOCK("""\
+
+NGINX_SERVERBLOCK = textwrap.dedent("""\
     server {
         listen 80;
         server_name randomwebsite.com www.randomwebsite.com;
@@ -54,7 +57,7 @@ NGINX_SERVERBLOCK("""\
         index index.html index.htm index.php;
     }
     location ~ \.php$ {
-        include /etc/nginx/fastcgi_params;
+        # include /etc/nginx/fastcgi_params;
         fastcgi_pass  127.0.0.1:9000; #this means php-fpm will run on a port
         # fastcgi_pass unix:/run/php-fpm/example.com.sock; or you could have php-fpm running on a socket
         fastcgi_index index.php;
@@ -63,8 +66,22 @@ NGINX_SERVERBLOCK("""\
     }
 """)
 
-@pytest.fixture
-def mock_nginx(nf):
-    nf.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
-    nf.CreateFiles('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
-    return nf
+
+n = nginxctl.nginxCtl()
+
+
+def test_get_all_config(fs):
+    fs.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
+    fs.CreateFile('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
+#    n = nginxctl.nginxCtl()
+    assert n._get_all_config() == ['/etc/nginx/nginx.conf', '/etc/nginx/conf.d/example.com.conf']
+
+
+def test__strip_line():
+    mytest_input1 = 'test;'
+    mytest_input2 = 'test"'
+    mytest_input3 = "test'"
+    answer = 'test'
+    assert n._strip_line(mytest_input1) == answer
+    assert n._strip_line(mytest_input2) == answer
+    assert n._strip_line(mytest_input3) == answer
