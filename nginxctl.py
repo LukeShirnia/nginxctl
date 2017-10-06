@@ -22,24 +22,6 @@ class nginxCtl:
     """
 
 
-    def get_conf_parameters(self):
-        """
-        Finds nginx configuration parameters
-
-        :returns: list of nginx configuration parameters
-        """
-        conf = "nginx -V 2>&1 | grep 'configure arguments:'"
-        p = subprocess.Popen(
-            conf, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        output, err = p.communicate()
-        output = re.sub('configure arguments:', '', output)
-        dict = {}
-        for item in output.split(" "):
-            if len(item.split("=")) == 2:
-                dict[item.split("=")[0]] = item.split("=")[1]
-        return dict
-
-
     def _get_vhosts(self):
         """
         get vhosts

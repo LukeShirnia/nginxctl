@@ -83,12 +83,17 @@ def test__strip_line():
 def test_get_all_config(fs):
     fs.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
     fs.CreateFile('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
-    assert n._get_all_config() == ['/etc/nginx/nginx.conf', '/etc/nginx/conf.d/example.com.conf']
+    assert n._get_all_config() == [
+    '/etc/nginx/nginx.conf', '/etc/nginx/conf.d/example.com.conf']
 
 
 def test_get_vhosts_info(fs):
     fs.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
     fs.CreateFile('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
     n = nginxctl.nginxCtl()
-    assert n._get_vhosts_info('etc/nginx/nginx.conf') == [{'l_num': 21, 'alias': [], 'servername': 'default_server_name', 'config_file': 'etc/nginx/nginx.conf', 'ip_port': ['80', '[::]:80']}]
-    assert n._get_vhosts_info('/etc/nginx/conf.d/example.com.conf') == [{'l_num': 0, 'alias': ['www.randomwebsite.com'], 'servername': 'randomwebsite.com', 'config_file': '/etc/nginx/conf.d/example.com.conf', 'ip_port': ['80']}]
+    assert n._get_vhosts_info('etc/nginx/nginx.conf') == [{'l_num': 21, 'alias'
+    : [], 'servername': 'default_server_name',
+     'config_file': 'etc/nginx/nginx.conf', 'ip_port': ['80', '[::]:80']}]
+    assert n._get_vhosts_info('/etc/nginx/conf.d/example.com.conf') == [{'l_num'
+    : 0, 'alias': ['www.randomwebsite.com'], 'servername': 'randomwebsite.com',
+     'config_file': '/etc/nginx/conf.d/example.com.conf', 'ip_port': ['80']}]
