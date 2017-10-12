@@ -87,7 +87,10 @@ class nginxCtl:
         Reads all config files, starting from the main one, expands all
         includes and returns all config in the correct order as a list.
         """
-        config_file = "/etc/nginx/nginx.conf" if config_file is None else config_file
+        if config_file is None:
+            config_file = "/etc/nginx/nginx.conf"
+        else:
+            config_file
         ret = [config_file]
 
         config_data = open(config_file, 'r').readlines()
@@ -138,7 +141,7 @@ class nginxCtl:
             ip_port = []
             server_name_found = False
             server_dict = {}
-            for line_num, li in enumerate(vhost_data, start=server_block[0]):
+            for line_num, li in enumerate(vhost_data):
                 l = vhost_data[line_num]
                 if line_num >= server_block[1]:
                     server_dict['alias'] = alias
@@ -158,7 +161,10 @@ class nginxCtl:
                     alias += l.split()[1:]
 
                 if l.startswith('server_name'):
-                    server_dict['servername'] = "default_server_name" if l.split()[1] == "_" else l.split()[1]
+                    if l.split()[1] == "_":
+                        server_dict['servername'] = "default_server_name"
+                    else:
+                        server_dict['servername'] = l.split()[1]
                     server_name_found = True
                     if len(l.split()) >= 2:
                         alias += l.split()[2:]

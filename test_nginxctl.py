@@ -4,6 +4,7 @@ import pytest
 import textwrap
 import sys
 import nginxctl
+import mock
 
 
 NGINX_CONF = textwrap.dedent("""\
@@ -90,10 +91,36 @@ def test_get_all_config(fs):
 def test_get_vhosts_info(fs):
     fs.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
     fs.CreateFile('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
-    n = nginxctl.nginxCtl()
     assert n._get_vhosts_info('etc/nginx/nginx.conf') == [{'l_num': 21, 'alias'
     : [], 'servername': 'default_server_name',
      'config_file': 'etc/nginx/nginx.conf', 'ip_port': ['80', '[::]:80']}]
     assert n._get_vhosts_info('/etc/nginx/conf.d/example.com.conf') == [{'l_num'
     : 0, 'alias': ['www.randomwebsite.com'], 'servername': 'randomwebsite.com',
      'config_file': '/etc/nginx/conf.d/example.com.conf', 'ip_port': ['80']}]
+
+
+#def test_get_vhosts(fs):
+#    fs.CreateFile('/etc/nginx/nginx.conf', contents=NGINX_CONF)
+#    fs.CreateFile('/etc/nginx/conf.d/example.com.conf', contents=NGINX_SERVERBLOCK)
+#    assert n.get_vhosts() == "test"
+
+
+#def test_get_vhosts(monkeypatch):
+#    n = nginxctl.nginxCtl()
+#    mock_return = [{'l_num': 21, 'alias'
+#    : [], 'servername': 'default_server_name',
+#     'config_file': 'etc/nginx/nginx.conf', 'ip_port': ['80', '[::]:80']}]
+#    monkeypatch.setattr("nginxctl.nginxCtl._get_vhosts", mock_return)
+#    assert n.get_vhosts() == "nginx vhost configuration"
+    
+
+    #return [{'l_num': 21, 'alias'
+    #: [], 'servername': 'default_server_name',
+    # 'config_file': 'etc/nginx/nginx.conf', 'ip_port': ['80', '[::]:80']}]
+
+
+#def test_get_vhosts(monkeypatch, mock_return):
+#    mock_get_vhosts = mock.Mock(spec=n._get_vhosts, return_value=mock_return)
+#    #monkeypatch.setitem(n.get_vhosts, 'vhost_list', mock_return)
+#    output = n.get_vhosts()
+#    assert output == "nginx vhost configuration"
