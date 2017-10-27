@@ -142,34 +142,35 @@ class nginxCtl:
             server_name_found = False
             server_dict = {}
             for line_num, li in enumerate(vhost_data):
-                l = vhost_data[line_num]
-                if line_num >= server_block[1]:
-                    server_dict['alias'] = alias
-                    server_dict['l_num'] = server_block[0]
-                    server_dict['config_file'] = config_file
-                    server_dict['ip_port'] = ip_port
-                    server_dict_ret.append(server_dict)
-                    server_name_found = False
-                    break
-
-                if l.startswith('#'):
-                    continue
-                l = l.split('#')[0]
-                l = l.strip().strip(';')
-
-                if l.startswith('server_name') and server_name_found:
-                    alias += l.split()[1:]
-
-                if l.startswith('server_name'):
-                    if l.split()[1] == "_":
-                        server_dict['servername'] = "default_server_name"
-                    else:
-                        server_dict['servername'] = l.split()[1]
-                    server_name_found = True
-                    if len(l.split()) >= 2:
-                        alias += l.split()[2:]
-                if l.startswith('listen'):
-                    ip_port.append(l.split()[1])
+                if line_num >= server_block[0]:
+                    l = vhost_data[line_num]
+                    if line_num >= server_block[1]:
+                        server_dict['alias'] = alias
+                        server_dict['l_num'] = server_block[0]
+                        server_dict['config_file'] = config_file
+                        server_dict['ip_port'] = ip_port
+                        server_dict_ret.append(server_dict)
+                        server_name_found = False
+                        break
+    
+                    if l.startswith('#'):
+                        continue
+                    l = l.split('#')[0]
+                    l = l.strip().strip(';')
+    
+                    if l.startswith('server_name') and server_name_found:
+                        alias += l.split()[1:]
+    
+                    if l.startswith('server_name'):
+                        if l.split()[1] == "_":
+                            server_dict['servername'] = "default_server_name"
+                        else:
+                            server_dict['servername'] = l.split()[1]
+                        server_name_found = True
+                        if len(l.split()) >= 2:
+                            alias += l.split()[2:]
+                    if l.startswith('listen'):
+                        ip_port.append(l.split()[1])
         return server_dict_ret
 
 
