@@ -121,7 +121,6 @@ class nginxCtl:
             if line.startswith('#'):
                 continue
             line = line.split('#')[0]
-            line = line.strip().strip(';')
             if re.match(r"server.*{", line):
                 server_block_boundry.append(line_number)
                 found_server_block = True
@@ -140,6 +139,8 @@ class nginxCtl:
             alias = []
             ip_port = []
             server_name_found = False
+            add_alias_newline = False
+            server_name_directive_found = False
             server_dict = {}
             for line_num, li in enumerate(vhost_data):
                 if line_num >= server_block[0]:
@@ -156,20 +157,72 @@ class nginxCtl:
                     if l.startswith('#'):
                         continue
                     l = l.split('#')[0]
-                    l = l.strip().strip(';')
-    
-                    if l.startswith('server_name') and server_name_found:
-                        alias += l.split()[1:]
-    
-                    if l.startswith('server_name'):
-                        if l.split()[1] == "_":
-                            server_dict['servername'] = "default_server_name"
-                        else:
-                            server_dict['servername'] = l.split()[1]
-                        server_name_found = True
-                        if len(l.split()) >= 2:
+
+                    # Finds server_name if its on a new line to the directive
+                    if server_name_directive_found is True and server_name_found is False:
+                        if len(l.strip().split()) >= 2 and l.endswith(';') is False:
+                            server_dict['servername'] = l.strip().strip(';').split()[0]
                             alias += l.split()[2:]
-                    if l.startswith('listen'):
+                            server_name_found = True
+                            add_alias_newline = True
+                        elif l.strip().endswith(';') is True and len(l.strip().split()) == 2:
+                            server_dict['servername'] = l.strip().strip(';').split()[0]
+                            alias += l.split()[2:]
+                            server_name_found = True
+                        else:
+                            server_name_directive_found = False
+                            server_name_found = True
+                            add_alias_newline = True
+   
+                    # Adds to alias' if there are multiple server_names 
+                    if l.strip().startswith('server_name') and server_name_found:
+                        l = l.strip().strip(';')
+                        alias += l.split()[1:]
+
+                    if l.strip().startswith('server_name') and len(l.strip().split()) >= 2:
+                        if l.strip().strip(';').split()[1] == "_":
+                            server_dict['servername'] = "default_server_name"
+                        elif len(l.strip().split()) == 2:
+                            # If there are only 2 items on server_name line
+                            server_dict['servername'] = l.strip().strip(';').split()[1]
+                        elif len(l.strip().split()) > 2 and l.strip().endswith(';') is False:
+                            # if there are more than 2 domains on server name line AND it doesn't end with ;
+                            server_dict['servername'] = l.strip().strip(';').split()[1]
+                            alias += l.split()[2:]
+                            server_name_found = True
+                            add_alias_newline = True
+                        else:
+                            server_dict['servername'] = l.strip().strip(';').split()[1]
+                        server_name_found = True
+
+                        # if server_name length of line > 2 and line ends with ;
+                        if len(l.strip().split()) >= 2 and l.strip().endswith(';') is True:
+                            if l.strip().endswith(';'):
+                                l = l.strip().strip(';')
+                                alias += l.split()[2:]
+                            elif l.strip().endswith(';') is not True:
+                                add_alias_newline = True
+
+                        # if ALL servernames on new line:
+                        elif l.strip().endswith(';') is not True and len(l.strip().split()) >= 2:
+                            if l.strip().startswith('servername') and len(l.strip()) <= 1:
+                                add_alias_newline = True
+                    elif l.strip().startswith('server_name') and len(l.strip().split()) <= 2:
+                        # the next line is the server name
+                        server_name_directive_found = True
+
+                    if add_alias_newline is True and server_name_found is True and "server_name" not in l.strip():
+                        if l.strip().endswith(';'):
+                        # this finds the last server_name 
+                            l = l.strip().strip(';')
+                            add_alias_newline = False
+                            alias += l.split()
+                        elif len(l.strip().split()) == 1:
+                            alias += l.split()
+                        else:
+                            alias += l.split()[0:]
+                    if l.strip().startswith('listen'):
+                        l = l.strip(';')
                         ip_port.append(l.split()[1])
         return server_dict_ret
 
