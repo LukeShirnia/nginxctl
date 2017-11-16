@@ -157,7 +157,6 @@ class nginxCtl:
                     if l.startswith('#'):
                         continue
                     l = l.split('#')[0]
-#                    l = l.strip().strip(';')
     
                     if not l.strip().endswith(';'):
                         if line_num != server_block[0]:
