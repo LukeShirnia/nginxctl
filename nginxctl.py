@@ -180,6 +180,11 @@ class nginxCtl:
                             alias += l.split()[2:]
                     if l.startswith('listen'):
                         ip_port.append(l.split()[1])
+
+        for i in server_dict_ret:
+            if len(i['ip_port']) == 0:
+                i['ip_port'].append('80')
+
         return server_dict_ret
 
 
